@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Day Counter</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .day-counter {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        /* CARD */
+
+        .card {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 5;
+
+            overflow: hidden;
+            border-radius: 24px;
+
+            background: #ddd;
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        /* Gradient overlay */
+
+        .card::after {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    to top,
+                    rgba(0, 0, 0, 0.8),
+                    rgba(0, 0, 0, 0.1) 60%,
+                    transparent
+                );
+        }
+
+        /* CARD CONTENT */
+
+        .card-content {
+            position: absolute;
+            z-index: 2;
+
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            padding: 28px;
+
+            color: white;
+        }
+
+        .card-date {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .card-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .day-number {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .day-label {
+            margin-top: 6px;
+
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+
+            opacity: 0.8;
+        }
+
+        /* NAVIGATION */
+
+        .navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-top: 20px;
+        }
+
+        .nav-button {
+            width: 42px;
+            height: 42px;
+
+            border: 1px solid #ddd;
+            border-radius: 50%;
+
+            background: white;
+
+            cursor: pointer;
+
+            font-size: 18px;
+
+            transition: 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #eee;
+        }
+
+        /* INDICATORS */
+
+        .indicators {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .indicator {
+            width: 7px;
+            height: 7px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: #ccc;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .indicator.active {
+            width: 22px;
+            border-radius: 10px;
+
+            background: #222;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="day-counter">
+
+        <!-- CARD -->
+
+        <div class="card">
+
+            <img
+                id="cardImage"
+                class="card-image"
+                src=""
+                alt=""
+            >
+
+            <div class="card-content">
+
+                <div
+                    id="cardDate"
+                    class="card-date"
+                ></div>
+
+                <h2
+                    id="cardTitle"
+                    class="card-title"
+                ></h2>
+
+                <div
+                    id="dayNumber"
+                    class="day-number"
+                ></div>
+
+                <div class="day-label">
+                    days since
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <div class="navigation">
+
+            <button
+                id="previousButton"
+                class="nav-button"
+            >
+                ←
+            </button>
+
+            <div
+                id="indicators"
+                class="indicators"
+            ></div>
+
+            <button
+                id="nextButton"
+                class="nav-button"
+            >
+                →
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /*
+         * ==========================================
+         * DATA
+         * ==========================================
+         */
+
+        const counters = [
+
+            {
+                id: 1,
+                title: "Our First Date",
+                date: "2026-08-07",
+                image: "images/first-date.jpg"
+            },
+
+            {
+                id: 2,
+                title: "First Concert",
+                date: "2026-08-10",
+                image: "images/first-concert.jpg"
+            },
+
+            {
+                id: 3,
+                title: "Japan Trip",
+                date: "2026-08-12",
+                image: "images/japan-trip.jpg"
+            }
+
+        ];
+
+
+        /*
+         * ==========================================
+         * STATE
+         * ==========================================
+         */
+
+        let currentIndex = 0;
+
+
+        /*
+         * ==========================================
+         * CALCULATE DAYS
+         * ==========================================
+         */
+
+        function calculateDays(dateString) {
+
+            const startDate =
+                new Date(dateString);
+
+            const today =
+                new Date();
+
+            startDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            const difference =
+                today.getTime()
+                - startDate.getTime();
+
+            return Math.floor(
+                difference /
+                (1000 * 60 * 60 * 24)
+            );
+        }
+
+
+        /*
+         * ==========================================
+         * FORMAT DATE
+         * ==========================================
+         */
+
+        function formatDate(dateString) {
+
+            const date =
+                new Date(dateString);
+
+            return date.toLocaleDateString(
+                "en-US",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+        }
+
+
+        /*
+         * ==========================================
+         * RENDER CARD
+         * ==========================================
+         */
+
+        function renderCard() {
+
+            const counter =
+                counters[currentIndex];
+
+            const days =
+                calculateDays(counter.date);
+
+
+            document.getElementById(
+                "cardImage"
+            ).src = counter.image;
+
+
+            document.getElementById(
+                "cardImage"
+            ).alt = counter.title;
+
+
+            document.getElementById(
+                "cardTitle"
+            ).textContent =
+                counter.title;
+
+
+            document.getElementById(
+                "cardDate"
+            ).textContent =
+                formatDate(counter.date);
+
+
+            document.getElementById(
+                "dayNumber"
+            ).textContent =
+                days;
+
+
+            renderIndicators();
+        }
+
+
+        /*
+         * ==========================================
+         * INDICATORS
+         * ==========================================
+         */
+
+        function renderIndicators() {
+
+            const container =
+                document.getElementById(
+                    "indicators"
+                );
+
+            container.innerHTML = "";
+
+
+            counters.forEach(
+                (counter, index) => {
+
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+                    button.className =
+                        "indicator";
+
+
+                    if (
+                        index === currentIndex
+                    ) {
+                        button.classList.add(
+                            "active"
+                        );
+                    }
+
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            currentIndex =
+                                index;
+
+                            renderCard();
+
+                        }
+                    );
+
+
+                    container.appendChild(
+                        button
+                    );
+
+                }
+            );
+        }
+
+
+        /*
+         * ==========================================
+         * NEXT
+         * ==========================================
+         */
+
+        document
+            .getElementById("nextButton")
+            .addEventListener(
+                "click",
+                () => {
+
+                    currentIndex++;
+
+                    if (
+                        currentIndex >=
+                        counters.length
+                    ) {
+                        currentIndex = 0;
+                    }
+
+                    renderCard();
+
+                }
+            );
+
+
+        /*
+         * ==========================================
+         * PREVIOUS
+         * ==========================================
+         */
+
+        document
+            .getElementById("previousButton")
+            .addEventListener(
+                "click",
+                () => {
+
+                    currentIndex--;
+
+                    if (
+                        currentIndex < 0
+                    ) {
+                        currentIndex =
+                            counters.length - 1;
+                    }
+
+                    renderCard();
+
+                }
+            );
+
+
+        /*
+         * ==========================================
+         * INITIAL RENDER
+         * ==========================================
+         */
+
+        renderCard();
+
+    </script>
+
+</body>
+</html>
