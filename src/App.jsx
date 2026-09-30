@@ -4,6 +4,9 @@ import Gallery from "./components/Gallery.jsx";
 import Header from "./components/Header.jsx";
 import Notes from "./components/Notes.jsx";
 
+import { useEffect, useState } from "react";
+import { supabase } from "./lib/supabase.js";
+
 const counters = [
   {
     id: 1,
@@ -56,13 +59,43 @@ const importantDates = [
 ];
 
 function App() {
+
+  const [counters, setCounters] = useState([]);
+  const [loadingCounters, setLoadingCounters] = useState(true);
+
+  useEffect(() => {
+    async function fetchCounters() {
+      const { data, error } = await supabase
+        .from("counters")
+        .select("id, title, date, image")
+        .order("date", { ascending: true });
+
+      if (error) {
+        console.error("Gagal mengambil counters:", error.message);
+      } else {
+        setCounters(data ?? []);
+      }
+
+      setLoadingCounters(false);
+    }
+
+    fetchCounters();
+  }, []);
+
+
   return (
     <div className="page">
       <Header />
 
       <main className="dashboard">
         <Calendar importantDates={importantDates} />
-        <DayCounter counters={counters} />
+        {loadingCounters ? (
+          <p>Memuat memories...</p>
+        ) : counters.length > 0 ? (
+          <DayCounter counters={counters} />
+        ) : (
+          <p>Belum ada memories.</p>
+        )}
         <Gallery images={galleryImages} />
         <Notes notes={notes} />
       </main>
