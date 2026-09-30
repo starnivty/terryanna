@@ -16,10 +16,10 @@ const galleryImages = [
 ];
 
 const importantDates = [
-  "2026-08-07",
-  "2026-08-12",
-  "2026-08-15",
-  "2026-08-25",
+  { date: "2026-08-07", title: "Contoh tanggal", description: "" },
+  { date: "2026-08-12", title: "", description: "" },
+  { date: "2026-08-15", title: "", description: "" },
+  { date: "2026-08-25", title: "", description: "" },
 ];
 
 function App() {
@@ -29,6 +29,9 @@ function App() {
 
   const [notes, setNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(true);
+
+  const [importantDates, setImportantDates] = useState([]);
+  const [loadingImportantDates, setLoadingImportantDates] = useState(true);
 
   useEffect(() => {
     async function fetchCounters() {
@@ -66,6 +69,25 @@ function App() {
     }
 
     fetchNotes();
+  }, []);
+  
+  useEffect(() => {
+    async function fetchImportantDates() {
+      const { data, error } = await supabase
+        .from("important_dates")
+        .select("date, title, description")
+        .order("date", { ascending: true });
+
+      if (error) {
+        console.error("Gagal mengambil important dates:", error.message);
+      } else {
+        setImportantDates(data ?? []);
+      }
+
+      setLoadingImportantDates(false);
+    }
+
+    fetchImportantDates();
   }, []);
 
 
