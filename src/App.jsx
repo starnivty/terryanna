@@ -8,18 +8,36 @@ import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase.js";
 
 const galleryImages = [
-  "/images/gallery-1.jpg",
-  "/images/gallery-2.jpg",
-  "/images/gallery-3.jpg",
-  "/images/gallery-4.jpg",
-  "/images/gallery-5.jpg",
-];
-
-const importantDates = [
-  { date: "2026-08-07", title: "Contoh tanggal", description: "" },
-  { date: "2026-08-12", title: "", description: "" },
-  { date: "2026-08-15", title: "", description: "" },
-  { date: "2026-08-25", title: "", description: "" },
+  {
+    src: "/images/gallery-1.jpg",
+    title: "From Orion",
+    description: "",
+    created_at: null,
+  },
+  {
+    src: "/images/gallery-2.jpg",
+    title: "",
+    description: "",
+    created_at: null,
+  },
+  {
+    src: "/images/gallery-3.jpg",
+    title: "",
+    description: "",
+    created_at: null,
+  },
+  {
+    src: "/images/gallery-4.jpg",
+    title: "",
+    description: "",
+    created_at: null,
+  },
+  {
+    src: "/images/gallery-5.jpg",
+    title: "",
+    description: "",
+    created_at: null,
+  },
 ];
 
 function App() {
@@ -33,6 +51,9 @@ function App() {
   const [importantDates, setImportantDates] = useState([]);
   const [loadingImportantDates, setLoadingImportantDates] = useState(true);
 
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [loadingGalleryImages, setLoadingGalleryImages] = useState(true);
+  
   useEffect(() => {
     async function fetchCounters() {
       const { data, error } = await supabase
@@ -90,6 +111,25 @@ function App() {
     fetchImportantDates();
   }, []);
 
+  useEffect(() => {
+    async function fetchGalleryImages() {
+      const { data, error } = await supabase
+        .from("gallery_images")
+        .select("src, title, description, created_at")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Gagal mengambil gallery images:", error.message);
+      } else {
+        setGalleryImages(data ?? []);
+      }
+
+      setLoadingGalleryImages(false);
+    }
+
+    fetchGalleryImages();
+  }, []);
+
 
   return (
     <div className="page">
@@ -97,14 +137,20 @@ function App() {
 
       <main className="dashboard">
         <Calendar importantDates={importantDates} />
-        {loadingCounters ? (
-          <p>Memuat memories...</p>
-        ) : counters.length > 0 ? (
-          <DayCounter counters={counters} />
+          {loadingCounters ? (
+            <p>Memuat memories...</p>
+          ) : counters.length > 0 ? (
+            <DayCounter counters={counters} />
+          ) : (
+            <p>Belum ada memories.</p>
+          )}
+        {loadingGalleryImages ? (
+          <p>Memuat gallery images...</p>
+        ) : galleryImages.length > 0 ? (
+          <Gallery images={galleryImages} />
         ) : (
-          <p>Belum ada memories.</p>
+          <p>Belum ada gallery images.</p>
         )}
-        <Gallery images={galleryImages} />
         {loadingNotes ? (
           <p>Memuat notes...</p>
         ) : notes.length > 0 ? (
