@@ -236,6 +236,26 @@ button {
   font-size: 15px;
 }
 
+.calendar-day.has-event {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.calendar-day.has-event:focus-visible {
+  outline: 2px solid #bd7378;
+  outline-offset: -4px;
+  border-radius: 50%;
+}
+
+.calendar-day.has-event:not(.today):hover span {
+  border-radius: 50%;
+  background: #f9e9e7;
+  color: #814c4d;
+}
+
 .calendar-day.other-month {
   color: #c4bebb;
 }
@@ -601,6 +621,30 @@ button {
   cursor: pointer;
 
   font-size: 20px;
+}
+
+.calendar-event-modal {
+  width: min(460px, 100%);
+}
+
+.calendar-event-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #bd7378;
+  font-size: 13px;
+}
+
+.calendar-event-date {
+  margin-bottom: 14px;
+  color: #8b4c50;
+  font-family: Georgia, serif;
+  font-size: 19px;
+}
+
+.calendar-event-description {
+  color: #766d69;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .note-list {
