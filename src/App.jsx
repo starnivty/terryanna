@@ -7,7 +7,7 @@ import Notes from "./components/Notes.jsx";
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase.js";
 
-const counters = [
+const countersOld = [
   {
     id: 1,
     title: "Our First Date",
@@ -63,6 +63,9 @@ function App() {
   const [counters, setCounters] = useState([]);
   const [loadingCounters, setLoadingCounters] = useState(true);
 
+  const [notes, setNotes] = useState([]);
+  const [loadingNotes, setLoadingNotes] = useState(true);
+
   useEffect(() => {
     async function fetchCounters() {
       const { data, error } = await supabase
@@ -82,6 +85,25 @@ function App() {
     fetchCounters();
   }, []);
 
+  useEffect(() => {
+    async function fetchNotes() {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("created_at, text")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Gagal mengambil notes:", error.message);
+      } else {
+        setNotes(data ?? []);
+      }
+
+      setLoadingNotes(false);
+    }
+
+    fetchNotes();
+  }, []);
+
 
   return (
     <div className="page">
@@ -97,7 +119,13 @@ function App() {
           <p>Belum ada memories.</p>
         )}
         <Gallery images={galleryImages} />
-        <Notes notes={notes} />
+        {loadingNotes ? (
+          <p>Memuat notes...</p>
+        ) : notes.length > 0 ? (
+          <Notes notes={notes} />
+        ) : (
+          <p>Belum ada notes.</p>
+        )}
       </main>
     </div>
   );

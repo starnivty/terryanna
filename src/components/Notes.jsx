@@ -1,5 +1,18 @@
 import { useState } from "react";
 
+function formatCreatedAt(value) {
+  if (!value) return "";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Jakarta",
+  }).format(new Date(value));
+}
+
 function Notes({ notes }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,8 +58,8 @@ function Notes({ notes }) {
 
           <div className="note-list">
             {notes.map((note) => (
-              <div className="note-item" key={note.date}>
-                <div className="note-item-date">{note.date}</div>
+              <div className="note-item" key={note.created_at}>
+                <div className="note-item-date">{formatCreatedAt(note.created_at)}</div>
                 <div className="note-item-text">{note.text}</div>
               </div>
             ))}
